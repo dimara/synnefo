@@ -2817,7 +2817,7 @@
           'cyclades.floating_ip': 'IP Addresses',
           'pithos.diskpace': 'Storage space',
           'cyclades.disk': 'Disk size',
-          'cyclades.network.private': 'Private networks'
+          'cyclades.network.private': 'Networks'
         },
 
         parse: function(resp) {
