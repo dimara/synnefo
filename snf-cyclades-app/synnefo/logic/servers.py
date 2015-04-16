@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2014 GRNET S.A.
+# Copyright (C) 2010-2015 GRNET S.A. and individual contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -735,7 +735,7 @@ def _port_for_request(user_id, network_dict):
     elif network_id is not None:
         address = network_dict.get("fixed_ip")
         network = util.get_network(network_id, user_id, non_deleted=True)
-        if network.public:
+        if network.public and network.floating_ip_pool:
             if network.subnet4 is not None:
                 if "fixed_ip" not in network_dict:
                     return create_public_ipv4_port(user_id, network)
