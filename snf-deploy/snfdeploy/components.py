@@ -940,7 +940,7 @@ class Apache(base.Component):
             ]
 
     def _configure(self):
-        r1 = {"HOST": self.node.fqdn}
+        r1 = {"domain": self.node.domain}
         return [
             ("/etc/apache2/sites-available/synnefo", r1, {}),
             ("/etc/apache2/sites-available/synnefo-ssl", r1, {}),
