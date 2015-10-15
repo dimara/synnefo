@@ -192,6 +192,9 @@ class HW(base.Component):
 class SSH(base.Component):
     @base.run_cmds
     def prepare(self):
+        if not config.key_inject:
+            return []
+
         return [
             "mkdir -p /root/.ssh",
             "for f in $(ls /root/.ssh/*); do cp $f $f.bak ; done",
@@ -199,6 +202,9 @@ class SSH(base.Component):
             ]
 
     def _configure(self):
+        if not config.key_inject:
+            return []
+
         files = [
             "authorized_keys", "id_dsa", "id_dsa.pub", "id_rsa", "id_rsa.pub"
             ]
@@ -207,6 +213,9 @@ class SSH(base.Component):
 
     @base.run_cmds
     def initialize(self):
+        if not config.key_inject:
+            return []
+
         f = "/root/.ssh/authorized_keys"
         return [
             "test -e {0}.bak && cat {0}.bak >> {0} || true".format(f)
