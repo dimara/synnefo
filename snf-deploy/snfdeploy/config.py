@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2014 GRNET S.A.
+# Copyright (C) 2010-2016 GRNET S.A. and individual contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -136,6 +136,7 @@ def init(args):
     config.dry_run = args.dry_run
     config.force = args.force
     config.ssh_key = args.ssh_key
+    config.key_inject = args.key_inject
     config.mem = args.mem
     config.vnc = args.vnc
     config.smp = args.smp
