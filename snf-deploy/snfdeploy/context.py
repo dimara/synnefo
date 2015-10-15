@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2014 GRNET S.A.
+# Copyright (C) 2010-2016 GRNET S.A. and individual contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -118,6 +118,11 @@ class Context(object):
     def all_ips(self):
         l = lambda x: config.get_node_info(x).ip
         return [l(n) for n in self.all_nodes]
+
+    @property
+    def all_nameservers(self):
+        l = lambda x: config.get_node_info(x).nameserver
+        return set([l(n) for n in self.all_nodes])
 
     def get(self, role):
         try:
