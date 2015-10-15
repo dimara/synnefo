@@ -527,7 +527,9 @@ class LVM(base.Component):
         # If extra disk found use it
         # else create a raw file and losetup it
         cmd = """
-if [ -b "{0}" ]; then
+if vgs {2}; then
+  echo "VG ${2} found!"
+elif [ -b "{0}" ]; then
   pvcreate {0} && vgcreate {2} {0}
 else
   truncate -s {3} {1}
