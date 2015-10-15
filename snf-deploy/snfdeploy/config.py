@@ -136,6 +136,7 @@ def init(args):
     config.dry_run = args.dry_run
     config.force = args.force
     config.ssh_key = args.ssh_key
+    config.key_inject = args.key_inject
     config.mem = args.mem
     config.vnc = args.vnc
     config.smp = args.smp
