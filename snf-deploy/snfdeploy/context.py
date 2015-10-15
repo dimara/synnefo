@@ -119,6 +119,11 @@ class Context(object):
         l = lambda x: config.get_node_info(x).ip
         return [l(n) for n in self.all_nodes]
 
+    @property
+    def all_nameservers(self):
+        l = lambda x: config.get_node_info(x).nameserver
+        return set([l(n) for n in self.all_nodes])
+
     def get(self, role):
         try:
             return config.get(self.setup, role)

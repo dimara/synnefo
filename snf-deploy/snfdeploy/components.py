@@ -333,6 +333,10 @@ EOF
     def _configure(self):
         d = self.node.domain
         ip = self.node.ip
+        r1 = {
+            "node_ips": ";".join(self.ctx.all_ips),
+            "nameservers": ";".join(self.ctx.all_nameservers),
+            }
         return [
             ("/etc/bind/named.conf.local", {"domain": d}, {}),
             ("/etc/bind/zones/example.com",
@@ -343,8 +347,7 @@ EOF
              {"remote": "/etc/bind/zones/vm.%s" % d}),
             ("/etc/bind/rev/synnefo.in-addr.arpa.zone", {"domain": d}, {}),
             ("/etc/bind/rev/synnefo.ip6.arpa.zone", {"domain": d}, {}),
-            ("/etc/bind/named.conf.options",
-             {"node_ips": ";".join(self.ctx.all_ips)}, {}),
+            ("/etc/bind/named.conf.options", r1, {}),
             ("/root/ddns/ddns.key", {}, {"remote": "/etc/bind/ddns.key"}),
             ]
 
