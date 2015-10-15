@@ -773,9 +773,12 @@ gnt-cluster init --enabled-hypervisors=kvm \
     --ipolicy-std-specs {2} \
     --ipolicy-bounds-specs min:{3}/max:{4} \
     --enabled-disk-templates file,ext \
-    {5}
+    --file-storage-dir {5}/ganeti/file-storage \
+    --shared-file-storage-dir {5}/ganeti/shared-file-storage \
+    {6}
         """.format(config.common_bridge, self.cluster.netdev,
-                   std, bound_min, bound_max, self.cluster.fqdn)
+                   std, bound_min, bound_max, config.shared_dir,
+                   self.cluster.fqdn)
 
         modify = "gnt-node modify --vm-capable=no %s" % self.node.fqdn
 
