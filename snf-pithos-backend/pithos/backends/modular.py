@@ -87,7 +87,6 @@ DEFAULT_DB_CONNECTION = 'sqlite:///backend.db'
 DEFAULT_BLOCK_MODULE = 'pithos.backends.lib.hashfiler'
 DEFAULT_BLOCK_SIZE = 4 * 1024 * 1024  # 4MB
 DEFAULT_HASH_ALGORITHM = 'sha256'
-DEFAULT_BLOCK_PARAMS = {'mappool': None, 'blockpool': None}
 
 # Default setting for new accounts.
 DEFAULT_ACCOUNT_QUOTA = 0  # No quota.
@@ -236,7 +235,7 @@ class ModularBackend(object):
                  service_token=None,
                  astakosclient_poolsize=None,
                  free_versioning=True,
-                 block_params=DEFAULT_BLOCK_PARAMS,
+                 block_params=None,
                  public_url_security=DEFAULT_PUBLIC_URL_SECURITY,
                  public_url_alphabet=DEFAULT_PUBLIC_URL_ALPHABET,
                  account_quota_policy=DEFAULT_ACCOUNT_QUOTA,
@@ -250,7 +249,7 @@ class ModularBackend(object):
                  acc_max_groups=DEFAULT_ACC_MAX_GROUPS,
                  acc_max_group_members=DEFAULT_ACC_MAX_GROUP_MEMBERS):
 
-        not_nullable = ('block_size', 'hash_algorithm', 'block_params',
+        not_nullable = ('block_size', 'hash_algorithm',
                         'public_url_security', 'public_url_alphabet',
                         'account_quota_policy', 'container_versioning_policy',
                         'archipelago_conf_file', 'xseg_pool_size',
@@ -310,11 +309,11 @@ class ModularBackend(object):
 
         self.ioctx_pool = glue.WorkerGlue.ioctx_pool
         self.block_module = load_module(block_module)
-        self.block_params = block_params
         params = {'block_size': self.block_size,
                   'hash_algorithm': self.hash_algorithm,
                   'archipelago_cfile': archipelago_conf_file}
-        params.update(self.block_params)
+        if block_params is not None:
+            params.update(block_params)
         self.store = self.block_module.Store(**params)
 
         self.astakos_auth_url = astakos_auth_url

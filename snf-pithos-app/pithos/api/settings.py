@@ -118,6 +118,8 @@ BACKEND_BLOCK_MODULE = getattr(
 BACKEND_BLOCK_PATH = getattr(
     settings, 'PITHOS_BACKEND_BLOCK_PATH', '/tmp/pithos-data/')
 BACKEND_BLOCK_UMASK = getattr(settings, 'PITHOS_BACKEND_BLOCK_UMASK', 0o022)
+BACKEND_BLOCK_KWARGS = getattr(
+    settings, 'PITHOS_BACKEND_BLOCK_KWARGS', {})
 
 
 # Default setting for new accounts.
