@@ -80,6 +80,8 @@ def get_pithos_backend():
             astakos_auth_url=settings.ASTAKOS_AUTH_URL,
             service_token=settings.CYCLADES_SERVICE_TOKEN,
             astakosclient_poolsize=settings.CYCLADES_ASTAKOSCLIENT_POOLSIZE,
+            block_module=settings.PITHOS_BACKEND_BLOCK_MODULE,
+            block_params=settings.PITHOS_BACKEND_BLOCK_KWARGS,
             db_connection=settings.BACKEND_DB_CONNECTION,
             archipelago_conf_file=settings.PITHOS_BACKEND_ARCHIPELAGO_CONF,
             xseg_pool_size=settings.PITHOS_BACKEND_XSEG_POOL_SIZE,
