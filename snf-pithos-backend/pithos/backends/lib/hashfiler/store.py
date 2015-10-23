@@ -19,8 +19,8 @@ from mapper import Mapper
 
 class Store(object):
     """Store.
-       Required constructor parameters: path, block_size, hash_algorithm,
-       blockpool, mappool.
+       Required constructor parameters: block_size, hash_algorithm,
+                                        archipelago_cfile, namelen
     """
 
     def __init__(self, **params):

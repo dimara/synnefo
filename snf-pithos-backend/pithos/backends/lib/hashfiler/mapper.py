@@ -18,8 +18,7 @@ from archipelagomapper import ArchipelagoMapper
 
 class Mapper(object):
     """Mapper.
-       Required constructor parameters: mappath, namelen.
-       Optional mappool.
+       Required constructor parameters: namelen.
     """
 
     def __init__(self, **params):

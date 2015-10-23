@@ -38,7 +38,6 @@ class ArchipelagoBlocker(object):
     """
 
     blocksize = None
-    blockpool = None
     hashtype = None
 
     def __init__(self, **params):

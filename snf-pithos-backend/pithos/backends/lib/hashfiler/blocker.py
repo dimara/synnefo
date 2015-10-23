@@ -19,7 +19,6 @@ from archipelagoblocker import ArchipelagoBlocker
 class Blocker(object):
     """Blocker.
        Required constructor parameters: blocksize, blockpath, hashtype.
-       Optional blockpool.
     """
 
     def __init__(self, **params):

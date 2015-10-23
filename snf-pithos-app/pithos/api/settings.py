@@ -138,10 +138,6 @@ BACKEND_POOL_SIZE = getattr(settings, 'PITHOS_BACKEND_POOL_SIZE', 5)
 # Update object checksums.
 UPDATE_MD5 = getattr(settings, 'PITHOS_UPDATE_MD5', False)
 
-RADOS_STORAGE = getattr(settings, 'PITHOS_RADOS_STORAGE', False)
-RADOS_POOL_BLOCKS = getattr(settings, 'PITHOS_RADOS_POOL_BLOCKS', 'blocks')
-RADOS_POOL_MAPS = getattr(settings, 'PITHOS_RADOS_POOL_MAPS', 'maps')
-
 # This enables a ui compatibility layer for the introduction of UUIDs in
 # identity management.  WARNING: Setting to True will break your installation.
 TRANSLATE_UUIDS = getattr(settings, 'PITHOS_TRANSLATE_UUIDS', False)

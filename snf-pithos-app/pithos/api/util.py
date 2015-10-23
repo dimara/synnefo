@@ -50,8 +50,7 @@ from pithos.api.settings import (BACKEND_DB_MODULE, BACKEND_DB_CONNECTION,
                                  BACKEND_XSEG_POOL_SIZE,
                                  BACKEND_MAP_CHECK_INTERVAL,
                                  BACKEND_MAPFILE_PREFIX,
-                                 RADOS_STORAGE, RADOS_POOL_BLOCKS,
-                                 RADOS_POOL_MAPS, TRANSLATE_UUIDS,
+                                 TRANSLATE_UUIDS,
                                  PUBLIC_URL_SECURITY, PUBLIC_URL_ALPHABET,
                                  BASE_HOST, UPDATE_MD5, VIEW_PREFIX,
                                  OAUTH2_CLIENT_CREDENTIALS, UNSAFE_DOMAIN,
@@ -999,13 +998,6 @@ def simple_list_response(request, l):
 
 from pithos.backends.util import PithosBackendPool
 
-if RADOS_STORAGE:
-    BLOCK_PARAMS = {'mappool': RADOS_POOL_MAPS,
-                    'blockpool': RADOS_POOL_BLOCKS, }
-else:
-    BLOCK_PARAMS = {'mappool': None,
-                    'blockpool': None, }
-
 BACKEND_KWARGS = dict(
     db_module=BACKEND_DB_MODULE,
     db_connection=BACKEND_DB_CONNECTION,
@@ -1016,7 +1008,7 @@ BACKEND_KWARGS = dict(
     service_token=SERVICE_TOKEN,
     astakosclient_poolsize=ASTAKOSCLIENT_POOLSIZE,
     free_versioning=BACKEND_FREE_VERSIONING,
-    block_params=BLOCK_PARAMS,
+    block_params=None,
     public_url_security=PUBLIC_URL_SECURITY,
     public_url_alphabet=PUBLIC_URL_ALPHABET,
     account_quota_policy=BACKEND_ACCOUNT_QUOTA,
