@@ -1884,9 +1884,11 @@ class Stats(base.Component):
         r1 = {
             "STATS": self.ctx.stats.cname,
             "STATS_SECRET": config.stats_secret,
+            "COLLECTD_SECRET": config.collectd_secret,
             }
         return [
             ("/etc/synnefo/stats.conf", r1, {}),
+            ("/etc/collectd/passwd", r1, {}),
             ("/etc/collectd/synnefo-stats.conf", r1, {}),
             ]
 
@@ -1905,7 +1907,6 @@ class GanetiCollectd(base.Component):
             "COLLECTD_SECRET": config.collectd_secret,
             }
         return [
-            ("/etc/collectd/passwd", {}, {}),
             ("/etc/collectd/synnefo-ganeti.conf", r1, {}),
             ]
 
