@@ -42,12 +42,7 @@ class SnapshotsTestSuite(CycladesTests):
         """Create a server and take a snapshot"""
         self.account = self._get_uuid()
         use_image = random.choice(self._parse_images())
-        archipelago_flavors = \
-            [f for f in self._parse_flavors() if
-             f['SNF:disk_template'].startswith('ext_archipelago')]
-        self.assertGreater(len(archipelago_flavors), 0,
-                           "No 'archipelago' disk template found")
-        self.use_flavor = random.choice(archipelago_flavors)
+        self.use_flavor = random.choice(self._parse_flavors())
         if self._image_is(use_image, "linux"):
             # Enforce personality test
             self.info("Creating personality content to be used")
