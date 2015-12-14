@@ -18,6 +18,7 @@ Common utils for burnin tests
 
 """
 
+import os
 import hashlib
 import re
 import shutil
@@ -792,11 +793,20 @@ def initialize(opts, testsuites, stale_testsuites):
     BurninTests.delete_stale = opts.delete_stale
     BurninTests.temp_directory = opts.temp_directory
     BurninTests.failfast = opts.failfast
-    BurninTests.run_id = SNF_TEST_PREFIX + \
-        datetime.datetime.strftime(curr_time, "%Y%m%d%H%M%S")
     BurninTests.obj_upload_num = opts.obj_upload_num
     BurninTests.obj_upload_min_size = opts.obj_upload_min_size
     BurninTests.obj_upload_max_size = opts.obj_upload_max_size
+
+    run_id = SNF_TEST_PREFIX + \
+        datetime.datetime.strftime(curr_time, "%Y%m%d%H%M%S")
+
+    state_dir = os.path.join(opts.state_folder, run_id)
+
+    if not os.path.exists(state_dir):
+        os.makedirs(state_dir)
+
+    BurninTests.state_dir = state_dir
+    BurninTests.run_id = run_id
 
     # Choose tests to run
     if opts.show_stale:

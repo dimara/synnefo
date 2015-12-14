@@ -149,6 +149,10 @@ def parse_arguments(args):
         type="string", default="/var/log/burnin/", dest="log_folder",
         help="Define the absolute path where the output log is stored")
     parser.add_option(
+        "--state-folder", action="store",
+        type="string", default="/var/lib/burnin/", dest="state_folder",
+        help="Define the absolute path where various test data is stored")
+    parser.add_option(
         "--verbose", "-v", action="store",
         type="int", default=1, dest="verbose",
         help="Print detailed output messages")
