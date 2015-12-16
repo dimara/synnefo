@@ -764,7 +764,7 @@ class BurninTests(unittest.TestCase):
 
 # --------------------------------------------------------------------
 # Initialize Burnin
-def initialize(opts, testsuites, stale_testsuites):
+def initialize(opts):
     """Initalize burnin
 
     Initialize our logger and burnin state
@@ -807,19 +807,6 @@ def initialize(opts, testsuites, stale_testsuites):
 
     BurninTests.state_dir = state_dir
     BurninTests.run_id = run_id
-
-    # Choose tests to run
-    if opts.show_stale:
-        # We will run the stale_testsuites
-        return (stale_testsuites, True)
-
-    if opts.tests != "all":
-        testsuites = opts.tests
-    if opts.exclude_tests is not None:
-        testsuites = [tsuite for tsuite in testsuites
-                      if tsuite not in opts.exclude_tests]
-
-    return (testsuites, opts.failfast)
 
 
 # --------------------------------------------------------------------
