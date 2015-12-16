@@ -33,7 +33,6 @@ corresponding line and closes the file.
 
 import os
 import sys
-import os.path
 import logging
 import datetime
 

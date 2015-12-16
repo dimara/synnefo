@@ -21,6 +21,8 @@ Burnin: functional tests for Synnefo
 import sys
 import optparse
 
+from importlib import import_module
+
 from synnefo_tools import version
 from synnefo_tools.burnin import common
 from synnefo_tools.burnin.astakos_tests import AstakosTestSuite
@@ -58,9 +60,24 @@ STALE_TESTSUITES = [
 STALE_TSUITES_NAMES = [tsuite.__name__ for tsuite in STALE_TESTSUITES]
 
 
-def string_to_class(names):
-    """Convert class namesto class objects"""
-    return [eval(name) for name in names]
+def string_to_class(name):
+    """Convert a class name to a class object"""
+    try:
+        # The class is already known and imported
+        return eval(name)
+    except NameError:
+        pass
+
+    try:
+        # Try find the given class assuming it is in the form
+        # module[.submodule...].class
+        module_name, class_name = name.rsplit(".", 1)
+        mod = import_module(module_name)
+        return getattr(mod, class_name)
+    except (ValueError, ImportError, AttributeError):
+        pass
+
+    raise RuntimeError("Test Suite `%s' does not exist" % name)
 
 
 # --------------------------------------------------------------------
@@ -226,14 +243,6 @@ def parse_arguments(args):
     if opts.quiet:
         opts.log_level = 2
 
-    # Check `--set-tests' and `--exclude-tests' options
-    if opts.tests != "all" and \
-            not (set(opts.tests)).issubset(set(TSUITES_NAMES)):
-        raise optparse.OptionValueError("The selected set of tests is invalid")
-    if opts.exclude_tests is not None and \
-            not (set(opts.exclude_tests)).issubset(set(TSUITES_NAMES)):
-        raise optparse.OptionValueError("The selected set of tests is invalid")
-
     # `token' is mandatory
     mandatory_argument(opts.token, "--token")
     # `auth_url' is mandatory
@@ -254,6 +263,26 @@ def mandatory_argument(value, arg_name):
         sys.exit("Invalid input")
 
 
+def find_final_test_suites(opts):
+    """Parse opts and return the final test suites classes."""
+
+    if opts.show_stale:
+        # We will run the stale_testsuites
+        return STALE_TESTSUITES
+
+    # By default run all test suites
+    names = TSUITES_NAMES
+    # If --set-tests given then take this into account
+    if opts.tests != "all":
+        names = opts.tests
+    # Remove any excluded test
+    if opts.exclude_tests is not None:
+        names = [tsuite for tsuite in names
+                 if tsuite not in opts.exclude_tests]
+
+    return [string_to_class(name) for name in names]
+
+
 # --------------------------------------------------------------------
 # Burnin main function
 def main():
@@ -270,10 +299,13 @@ def main():
     # Parse arguments using `optparse'
     (opts, _) = parse_arguments(sys.argv[1:])
 
+    testsuites = find_final_test_suites(opts)
+
     # Initialize burnin
-    (testsuites, failfast) = \
-        common.initialize(opts, TSUITES_NAMES, STALE_TSUITES_NAMES)
-    testsuites = string_to_class(testsuites)
+    common.initialize(opts)
+
+    # In case we clean up we have to fail fast
+    failfast = True if opts.show_stale else opts.failfast
 
     # Run burnin
     # The return value denotes the success status
