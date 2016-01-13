@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2014 GRNET S.A.
+# Copyright (C) 2010-2016 GRNET S.A. and individual contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -369,10 +369,12 @@ class Node(DBWorker):
 
     def node_purge_children(self, parent, before=inf, cluster=0,
                             update_statistics_ancestors_depth=None):
-        """Delete all versions with the specified
-           parent and cluster, and return
-           the hashes, the total size and the serials of versions deleted.
-           Clears out nodes with no remaining versions.
+        """Delete all versions with the specified parent and cluster.
+
+        Returns the hashes, the total size, serials and the names of the
+        mapfiles of the versions that have been deleted. Clears out nodes with
+        no remaining versions.
+
         """
         #update statistics
         c1 = select([self.nodes.c.node],
@@ -389,21 +391,24 @@ class Node(DBWorker):
         row = r.fetchone()
         r.close()
         if not row:
-            return (), 0, ()
+            return (), 0, (), ()
         nr, size = row[0], row[1] if row[1] else 0
         mtime = time()
         self.statistics_update(parent, -nr, -size, mtime, cluster)
         self.statistics_update_ancestors(parent, -nr, -size, mtime, cluster,
                                          update_statistics_ancestors_depth)
 
-        s = select([self.versions.c.hash, self.versions.c.serial])
+        s = select([self.versions.c.hash, self.versions.c.serial,
+                    self.versions.c.mapfile])
         s = s.where(where_clause)
         r = self.conn.execute(s)
         hashes = []
         serials = []
+        mapfiles = []
         for row in r.fetchall():
-            hashes += [row[0]]
-            serials += [row[1]]
+            hashes.append(row[0])
+            serials.append(row[1])
+            mapfiles.append(row[2])
         r.close()
 
         #delete versions
@@ -424,14 +429,16 @@ class Node(DBWorker):
             s = self.nodes.delete().where(self.nodes.c.node.in_(nodes))
             self.conn.execute(s).close()
 
-        return hashes, size, serials
+        return hashes, size, serials, mapfiles
 
     def node_purge(self, node, before=inf, cluster=0,
                    update_statistics_ancestors_depth=None):
-        """Delete all versions with the specified
-           node and cluster, and return
-           the hashes and size of versions deleted.
-           Clears out the node if it has no remaining versions.
+        """Delete all versions with the specified node and cluster.
+
+        Returns the hashes, size and the name of the mapfiles of the versions
+        that have been deleted. Clears out the node if it has no remaining
+        versions.
+
         """
 
         #update statistics
@@ -448,19 +455,22 @@ class Node(DBWorker):
         nr, size = row[0], row[1]
         r.close()
         if not nr:
-            return (), 0, ()
+            return (), 0, (), ()
         mtime = time()
         self.statistics_update_ancestors(node, -nr, -size, mtime, cluster,
                                          update_statistics_ancestors_depth)
 
-        s = select([self.versions.c.hash, self.versions.c.serial])
+        s = select([self.versions.c.hash, self.versions.c.serial,
+                   self.versions.c.mapfile])
         s = s.where(where_clause)
         r = self.conn.execute(s)
         hashes = []
         serials = []
+        mapfiles = []
         for row in r.fetchall():
-            hashes += [row[0]]
-            serials += [row[1]]
+            hashes.append(row[0])
+            serials.append(row[1])
+            mapfiles.append(row[2])
         r.close()
 
         #delete versions
@@ -481,7 +491,7 @@ class Node(DBWorker):
             s = self.nodes.delete().where(self.nodes.c.node.in_(nodes))
             self.conn.execute(s).close()
 
-        return hashes, size, serials
+        return hashes, size, serials, mapfiles
 
     def node_remove(self, node, update_statistics_ancestors_depth=None):
         """Remove the node specified.
@@ -1028,6 +1038,7 @@ class Node(DBWorker):
         hash = props.hash
         size = props.size
         cluster = props.cluster
+        mapfile = props.mapfile
 
         mtime = time()
         self.statistics_update_ancestors(node, -1, -size, mtime, cluster,
@@ -1040,7 +1051,7 @@ class Node(DBWorker):
         if props:
             self.nodes_set_latest_version(node, serial)
 
-        return hash, size
+        return hash, size, mapfile
 
     def attribute_get_domains(self, serial, node=None):
         node = node or select([self.versions.c.node],
