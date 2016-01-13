@@ -13,11 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from objpool import ObjectPool
 from new import instancemethod
 from select import select
 from traceback import print_exc
 from pithos.backends import connect_backend
+
+log = logging.getLogger(__name__)
 
 USAGE_LIMIT = 500
 
@@ -25,9 +29,11 @@ USAGE_LIMIT = 500
 class PithosBackendPool(ObjectPool):
     def __init__(self, size=None, **kwargs):
         super(PithosBackendPool, self).__init__(size=size)
+        log.debug("Initializing PithosBackendPool")
         self.backend_kwargs = kwargs
 
     def _pool_create(self):
+        log.debug("Creating pool")
         backend = connect_backend(**self.backend_kwargs)
         backend._real_close = backend.close
         backend.close = instancemethod(_pooled_backend_close, backend,
@@ -38,6 +44,7 @@ class PithosBackendPool(ObjectPool):
         return backend
 
     def _pool_verify(self, backend):
+        log.debug("Verifying pool %s", backend)
         wrapper = backend.wrapper
         conn = wrapper.conn
         if conn.closed:
@@ -62,9 +69,11 @@ class PithosBackendPool(ObjectPool):
                 print_exc()
                 return False
 
+        log.debug("Pool %s ok", backend)
         return True
 
     def _pool_cleanup(self, backend):
+        log.debug("Cleaning up pool %s", backend)
         c = backend._use_count - 1
         if c < 0:
             backend._real_close()
@@ -84,6 +93,7 @@ class PithosBackendPool(ObjectPool):
     def shutdown(self):
         while True:
             backend = self.pool_get(create=False)
+            log.debug("Shutting down pool %s", backend)
             if backend is None:
                 break
             self.pool_put(None)
@@ -91,4 +101,5 @@ class PithosBackendPool(ObjectPool):
 
 
 def _pooled_backend_close(backend):
+    log.debug("Closing pool %s", backend)
     backend._pool.pool_put(backend)
