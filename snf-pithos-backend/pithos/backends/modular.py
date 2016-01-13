@@ -79,6 +79,7 @@ class HashMap(list):
         h += [('\x00' * len(h[0]))] * (s - len(h))
         while len(h) > 1:
             h = [self._hash_raw(h[x] + h[x + 1]) for x in range(0, len(h), 2)]
+        logger.debug("HashMap: New Merkle hash %s", binascii.hexlify(h[0]))
         return h[0]
 
 # Default modules and settings.
@@ -766,8 +767,9 @@ class ModularBackend(object):
             versioning = self._get_policy(
                 node, is_account_policy=False)[VERSIONING_POLICY]
             if versioning != 'auto':
-                self.node.version_remove(src_version_id,
-                                         update_statistics_ancestors_depth=0)
+                _ , _, mapfile = self.node.version_remove(
+                    src_version_id, update_statistics_ancestors_depth=0)
+                self.store.map_delete(mapfile)
 
     @debug_method
     @backend_method
@@ -871,11 +873,11 @@ class ModularBackend(object):
         project = self._get_project(node)
 
         if until is not None:
-            hashes, size, _ = self.node.node_purge_children(
+            _, size, _, mapfiles = self.node.node_purge_children(
                 node, until, CLUSTER_HISTORY,
                 update_statistics_ancestors_depth=0)
-            for h in hashes:
-                self.store.map_delete(h)
+            for m in mapfiles:
+                self.store.map_delete(m)
             self.node.node_purge_children(node, until, CLUSTER_DELETED,
                                           update_statistics_ancestors_depth=0)
             if not self.free_versioning:
@@ -886,11 +888,11 @@ class ModularBackend(object):
         if not delimiter:
             if self._get_statistics(node)[0] > 0:
                 raise ContainerNotEmpty("Container is not empty")
-            hashes, size, _ = self.node.node_purge_children(
+            _, size, _, mapfiles = self.node.node_purge_children(
                 node, inf, CLUSTER_HISTORY,
                 update_statistics_ancestors_depth=0)
-            for h in hashes:
-                self.store.map_delete(h)
+            for m in mapfiles:
+                self.store.map_delete(m)
             self.node.node_purge_children(node, inf, CLUSTER_DELETED,
                                           update_statistics_ancestors_depth=0)
             self.node.node_remove(node, update_statistics_ancestors_depth=0)
@@ -1862,19 +1864,22 @@ class ModularBackend(object):
         if until is not None:
             if node is None:
                 return
-            hashes = []
             size = 0
-            h, s, _ = self.node.node_purge(node, until, CLUSTER_NORMAL,
-                                           update_statistics_ancestors_depth=1)
-            hashes += h
+            mapfiles = []
+            _, s, _, m = self.node.node_purge(
+                node, until, CLUSTER_NORMAL,
+                update_statistics_ancestors_depth=1)
             size += s
-            h, s, _ = self.node.node_purge(node, until, CLUSTER_HISTORY,
-                                           update_statistics_ancestors_depth=1)
-            hashes += h
+            mapfiles += m
+            _, s, _, m = self.node.node_purge(
+                node, until, CLUSTER_HISTORY,
+                update_statistics_ancestors_depth=1)
+            mapfiles += m
             if not self.free_versioning:
                 size += s
-            for h in hashes:
-                self.store.map_delete(h)
+            for m in mapfiles:
+                self.store.map_delete(m)
+
             self.node.node_purge(node, until, CLUSTER_DELETED,
                                  update_statistics_ancestors_depth=1)
             try:
@@ -1890,7 +1895,7 @@ class ModularBackend(object):
 
         # keep reference to the mapfile
         # in case we will want to delete them in the future
-        src_version_id, dest_version_id, _ = self._put_version_duplicate(
+        src_version_id, dest_version_id, mapfile = self._put_version_duplicate(
             user, node, size=0, type='', hash=None, checksum='',
             cluster=CLUSTER_DELETED, update_statistics_ancestors_depth=1,
             keep_src_mapfile=True)
@@ -2474,9 +2479,9 @@ class ModularBackend(object):
         versioning = self._get_policy(
             node, is_account_policy=False)[VERSIONING_POLICY]
         if versioning != 'auto':
-            hash, size = self.node.version_remove(
+            _, size, mapfile = self.node.version_remove(
                 version_id, update_statistics_ancestors_depth)
-            self.store.map_delete(hash)
+            self.store.map_delete(mapfile)
             return size
         elif self.free_versioning:
             return self.node.version_get_properties(

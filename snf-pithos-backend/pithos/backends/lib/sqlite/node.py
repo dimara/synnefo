@@ -286,13 +286,13 @@ class Node(DBWorker):
         execute(q, args)
         nr, size = self.fetchone()
         if not nr:
-            return (), 0, ()
+            return (), 0, (), ()
         mtime = time()
         self.statistics_update(parent, -nr, -size, mtime, cluster)
         self.statistics_update_ancestors(parent, -nr, -size, mtime, cluster,
                                          update_statistics_ancestors_depth)
 
-        q = ("select hash, serial from versions "
+        q = ("select hash, serial, mapfile from versions "
              "where node in (select node "
              "from nodes "
              "where parent = ?) "
@@ -301,9 +301,11 @@ class Node(DBWorker):
         execute(q, args)
         hashes = []
         serials = []
+        mapfiles = []
         for r in self.fetchall():
             hashes += [r[0]]
             serials += [r[1]]
+            mapfiles += [r[2]]
 
         q = ("delete from versions "
              "where node in (select node "
@@ -319,7 +321,7 @@ class Node(DBWorker):
              "where node = n.node) = 0 "
              "and parent = ?)")
         execute(q, (parent,))
-        return hashes, size, serials
+        return hashes, size, serials, mapfiles
 
     def node_purge(self, node, before=inf, cluster=0,
                    update_statistics_ancestors_depth=None):
@@ -338,21 +340,23 @@ class Node(DBWorker):
         execute(q, args)
         nr, size = self.fetchone()
         if not nr:
-            return (), 0, ()
+            return (), 0, (), ()
         mtime = time()
         self.statistics_update_ancestors(node, -nr, -size, mtime, cluster,
                                          update_statistics_ancestors_depth)
 
-        q = ("select hash, serial from versions "
+        q = ("select hash, serial, mapfile from versions "
              "where node = ? "
              "and cluster = ? "
              "and mtime <= ?")
         execute(q, args)
         hashes = []
         serials = []
+        mapfiles = []
         for r in self.fetchall():
             hashes += [r[0]]
             serials += [r[1]]
+            mapfiles += [r[2]]
 
         q = ("delete from versions "
              "where node = ? "
@@ -366,7 +370,7 @@ class Node(DBWorker):
              "where node = n.node) = 0 "
              "and node = ?)")
         execute(q, (node,))
-        return hashes, size, serials
+        return hashes, size, serials, mapfiles
 
     def node_remove(self, node, update_statistics_ancestors_depth=None):
         """Remove the node specified.
@@ -744,6 +748,7 @@ class Node(DBWorker):
         hash = props[self.HASH]
         size = props[self.SIZE]
         cluster = props[self.CLUSTER]
+        mapfile = props[self.MAPFILE]
 
         mtime = time()
         self.statistics_update_ancestors(node, -1, -size, mtime, cluster,
@@ -755,7 +760,7 @@ class Node(DBWorker):
         props = self.version_lookup(node, cluster=cluster, all_props=False)
         if props:
             self.nodes_set_latest_version(node, props[0])
-        return hash, size
+        return hash, size, mapfile
 
     def attribute_get_domains(self, serial, node=None):
         q = ("select distinct domain from attributes "

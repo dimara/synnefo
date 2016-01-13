@@ -1292,6 +1292,8 @@ def object_delete(request, v_account, v_container, v_object):
     until = get_int_parameter(request.GET.get('until'))
     delimiter = request.GET.get('delimiter')
 
+    logger.debug("Deleting object %s/%s until %s", v_container, v_object, until)
+
     request.backend.delete_object(
         request.user_uniq, v_account, v_container,
         v_object, until, delimiter=delimiter,
