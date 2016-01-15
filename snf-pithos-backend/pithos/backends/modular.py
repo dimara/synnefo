@@ -235,6 +235,7 @@ class ModularBackend(object):
                  service_token=None,
                  astakosclient_poolsize=None,
                  free_versioning=True,
+                 purge_mapfiles=False,
                  block_params=None,
                  public_url_security=DEFAULT_PUBLIC_URL_SECURITY,
                  public_url_alphabet=DEFAULT_PUBLIC_URL_ALPHABET,
@@ -275,6 +276,7 @@ class ModularBackend(object):
         self.hash_algorithm = hash_algorithm
         self.block_size = block_size
         self.free_versioning = free_versioning
+        self.purge_mapfiles = purge_mapfiles
         self.map_check_interval = map_check_interval
         self.mapfile_prefix = mapfile_prefix
         self.resource_max_metadata = resource_max_metadata
@@ -769,7 +771,8 @@ class ModularBackend(object):
             if versioning != 'auto':
                 _ , _, mapfile = self.node.version_remove(
                     src_version_id, update_statistics_ancestors_depth=0)
-                self.store.map_delete(mapfile)
+                if self.purge_mapfiles:
+                    self.store.map_delete(mapfile)
 
     @debug_method
     @backend_method
@@ -876,8 +879,9 @@ class ModularBackend(object):
             _, size, _, mapfiles = self.node.node_purge_children(
                 node, until, CLUSTER_HISTORY,
                 update_statistics_ancestors_depth=0)
-            for m in mapfiles:
-                self.store.map_delete(m)
+            if self.purge_mapfiles:
+                for m in mapfiles:
+                    self.store.map_delete(m)
             self.node.node_purge_children(node, until, CLUSTER_DELETED,
                                           update_statistics_ancestors_depth=0)
             if not self.free_versioning:
@@ -891,8 +895,9 @@ class ModularBackend(object):
             _, size, _, mapfiles = self.node.node_purge_children(
                 node, inf, CLUSTER_HISTORY,
                 update_statistics_ancestors_depth=0)
-            for m in mapfiles:
-                self.store.map_delete(m)
+            if self.purge_mapfiles:
+                for m in mapfiles:
+                    self.store.map_delete(m)
             self.node.node_purge_children(node, inf, CLUSTER_DELETED,
                                           update_statistics_ancestors_depth=0)
             self.node.node_remove(node, update_statistics_ancestors_depth=0)
@@ -1877,8 +1882,9 @@ class ModularBackend(object):
             mapfiles.extend(m)
             if not self.free_versioning:
                 size += s
-            for m in mapfiles:
-                self.store.map_delete(m)
+            if self.purge_mapfiles:
+                for m in mapfiles:
+                    self.store.map_delete(m)
 
             self.node.node_purge(node, until, CLUSTER_DELETED,
                                  update_statistics_ancestors_depth=1)
@@ -2481,7 +2487,8 @@ class ModularBackend(object):
         if versioning != 'auto':
             _, size, mapfile = self.node.version_remove(
                 version_id, update_statistics_ancestors_depth)
-            self.store.map_delete(mapfile)
+            if self.purge_mapfiles:
+                self.store.map_delete(mapfile)
             return size
         elif self.free_versioning:
             return self.node.version_get_properties(
