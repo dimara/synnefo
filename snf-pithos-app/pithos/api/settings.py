@@ -185,6 +185,10 @@ BACKEND_XSEG_POOL_SIZE = getattr(settings, 'PITHOS_BACKEND_XSEG_POOL_SIZE', 8)
 BACKEND_MAP_CHECK_INTERVAL = getattr(settings,
                                      'PITHOS_BACKEND_MAP_CHECK_INTERVAL', 5)
 
+# Whether to delete mapfiles or not
+BACKEND_PURGE_MAPFILES = getattr(settings, 'PITHOS_BACKEND_PURGE_MAPFILES',
+                                 False)
+
 # The archipelago mapfile prefix (it should not exceed 15 characters)
 # WARNING: Once set it should not be changed
 BACKEND_MAPFILE_PREFIX = getattr(settings,
