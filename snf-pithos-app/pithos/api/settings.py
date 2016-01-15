@@ -120,6 +120,8 @@ BACKEND_BLOCK_PATH = getattr(
 BACKEND_BLOCK_UMASK = getattr(settings, 'PITHOS_BACKEND_BLOCK_UMASK', 0o022)
 BACKEND_BLOCK_KWARGS = getattr(
     settings, 'PITHOS_BACKEND_BLOCK_KWARGS', {})
+BACKEND_PURGE_MAFILES = getattr(
+    settings, 'PITHOS_BACKEND_PURGE_MAPFILES', False)
 
 
 # Default setting for new accounts.
